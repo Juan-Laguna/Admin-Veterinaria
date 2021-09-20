@@ -1,25 +1,66 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import Form from './components/Form';
+import AppointmentList from './components/AppointmentList';
 
-function App() {
+
+
+const App = () => {
+
+  // Citas en LocalStorage
+
+  let previousAppointments = JSON.parse(localStorage.getItem('appointments'));
+  if (!previousAppointments) {
+    previousAppointments = [];
+  }
+
+  const [appointments, setappointments] = useState([previousAppointments]);
+
+  useEffect(() => {
+    if (previousAppointments) {
+      localStorage.setItem('citas', JSON.stringify(appointments))
+    } else {
+      localStorage.setItem('citas', JSON.stringify([]))
+    }
+  }, [appointments, previousAppointments])
+
+  // Funcion que lista las citas actuales y agrega las nuevas
+  const createAppointment = appointment => {
+    setappointments([...appointments, appointment])
+  }
+
+  // Funcion que elimina una cita por su id
+  const deleteAppointment = id => {
+      const newAppointments = appointments.filter(appointment => appointment.id !== id);
+      setappointments(newAppointments);
+  }
+
+  // Mensaje condicional
+  const title = appointments.length === 0 ? 'No hay citas' : 'Administrador de citas'
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <h1>Administrador de pacientes</h1>
+      <div className="container">
+        <div className="row">
+          <div className="one-half column">
+            <Form
+              createAppointment={createAppointment}
+            />
+          </div>
+          <div className="one-half column">
+            <h2>{title}</h2>
+            {appointments.map(appointment => (
+              <AppointmentList
+                key={appointment.id}
+                appointment={appointment}
+                deleteAppointment={deleteAppointment}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  )
 }
 
-export default App;
+export default App
